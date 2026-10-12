@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>BORE Tweaker</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="appbar">
+  <div class="title">BORE Tweaker</div>
+  <div class="subtitle" id="status">reading…</div>
+</header>
+
+<main>
+
+  <section class="card">
+    <h2>Profile</h2>
+    <p class="muted">Applied at every boot by the module's service.sh.</p>
+    <div class="chips" id="profiles"></div>
+  </section>
+
+  <section class="card">
+    <h2>Burst penalty</h2>
+    <p class="muted">How hard a task that has been running is demoted, and
+      how long its burst time survives.</p>
+    <div id="ctrl-penalty"></div>
+  </section>
+
+  <section class="card">
+    <h2>Preemption</h2>
+    <p class="muted">
+      <strong>min_base_slice_ns</strong> is the minimum time a task keeps the
+      CPU. Too low and you get thrash, too high and interactive tasks wait.
+    </p>
+    <div id="ctrl-slice"></div>
+  </section>
+
+  <section class="card">
+    <h2>Burst cache</h2>
+    <p class="muted">How quickly a task's burst state is forgotten.</p>
+    <div id="ctrl-cache"></div>
+  </section>
+
+  <section class="card">
+    <h2>Behaviour switches</h2>
+    <div id="ctrl-flags"></div>
+  </section>
+
+  <section class="card danger">
+    <h2>Reset</h2>
+    <p class="muted">Writes the kernel defaults back. Safe to use if a
+      profile made the device feel wrong.</p>
+    <button class="btn" id="reset">Restore defaults</button>
+  </section>
+
+</main>
+
+<footer class="muted small">
+  Reads and writes through the manager's exec API. Values not present on
+  this kernel are hidden rather than shown as zero.
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

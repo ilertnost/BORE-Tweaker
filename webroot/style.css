@@ -1,0 +1,118 @@
+/* BORE Tweaker — Material 3 inspired surface, no dependencies.
+   Colour roles mirror the M3 tonal system: primary, surface, outline. */
+
+:root {
+  --primary: #6750a4;
+  --on-primary: #ffffff;
+  --primary-container: #eaddff;
+  --on-primary-container: #21005d;
+  --surface: #fef7ff;
+  --surface-container: #f3edf7;
+  --on-surface: #1d1b20;
+  --on-surface-variant: #49454f;
+  --outline: #79747e;
+  --error: #b3261e;
+  --error-container: #f9dedc;
+  --radius: 16px;
+  --shape-s: 8px;
+  --shape-m: 12px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary: #d0bcff;
+    --on-primary: #381e72;
+    --primary-container: #4f378b;
+    --on-primary-container: #eaddff;
+    --surface: #141218;
+    --surface-container: #211f26;
+    --on-surface: #e6e0e9;
+    --on-surface-variant: #cac4d0;
+    --outline: #938f99;
+    --error: #f2b8b5;
+    --error-container: #8c1d18;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 0 0 48px;
+  background: var(--surface);
+  color: var(--on-surface);
+  font-family: system-ui, "Roboto", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.appbar {
+  position: sticky; top: 0; z-index: 2;
+  padding: 20px 20px 16px;
+  background: var(--surface-container);
+  border-bottom: 1px solid var(--outline);
+}
+.appbar .title { font-size: 22px; font-weight: 500; letter-spacing: .1px; }
+.appbar .subtitle { font-size: 13px; color: var(--on-surface-variant); margin-top: 4px; }
+
+main { max-width: 720px; margin: 0 auto; padding: 16px; }
+
+.card {
+  background: var(--surface-container);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.card h2 { margin: 0 0 6px; font-size: 16px; font-weight: 500; }
+.card.danger { background: var(--error-container); }
+.muted { color: var(--on-surface-variant); font-size: 13px; line-height: 1.5; margin: 0 0 14px; }
+.small { font-size: 12px; }
+
+/* --- chips ------------------------------------------------------------ */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  border: 1px solid var(--outline);
+  background: transparent;
+  color: var(--on-surface);
+  border-radius: var(--shape-s);
+  padding: 8px 16px;
+  font: inherit; font-size: 14px;
+  cursor: pointer;
+}
+.chip[aria-pressed="true"] {
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  border-color: transparent;
+}
+
+/* --- controls --------------------------------------------------------- */
+.ctl { margin-bottom: 18px; }
+.ctl:last-child { margin-bottom: 0; }
+.ctl .row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 6px;
+}
+.ctl .name { font-size: 14px; font-weight: 500; }
+.ctl .val {
+  font-variant-numeric: tabular-nums;
+  font-size: 14px; color: var(--primary);
+}
+.ctl input[type=range] { width: 100%; accent-color: var(--primary); }
+.ctl .hint { font-size: 12px; color: var(--on-surface-variant); margin-top: 4px; }
+
+.switch { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; }
+.switch .name { font-size: 14px; }
+
+.btn {
+  border: none; border-radius: 20px;
+  background: var(--primary); color: var(--on-primary);
+  padding: 10px 24px; font: inherit; font-size: 14px; font-weight: 500;
+  cursor: pointer;
+}
+.btn:active { opacity: .9; }
+
+.warn {
+  background: var(--error-container); color: var(--on-surface);
+  border-radius: var(--shape-s); padding: 10px 12px;
+  font-size: 13px; margin-bottom: 12px; display: none;
+}
+.warn.show { display: block; }
