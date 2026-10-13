@@ -15,6 +15,8 @@
 
 <main>
 
+  <div class="warn" id="warn"></div>
+
   <section class="card">
     <h2>Profile</h2>
     <p class="muted">Applied at every boot by the module's service.sh.</p>
@@ -31,8 +33,10 @@
   <section class="card">
     <h2>Preemption</h2>
     <p class="muted">
-      <strong>min_base_slice_ns</strong> is the minimum time a task keeps the
-      CPU. Too low and you get thrash, too high and interactive tasks wait.
+      <strong>min_base_slice_ns</strong> is the shortest time a task may hold
+      the CPU. The kernel rounds it up to a whole tick, and a tick is 4 ms at
+      HZ=250, so 4 ms is the floor and only 8 ms and above change anything.
+      The line below is the value the scheduler actually uses.
     </p>
     <div id="ctrl-slice"></div>
   </section>
