@@ -68,7 +68,19 @@ terminal.
 
 ## Install
 
-Flash in Magisk or KernelSU, then use the module's action button to open the GUI.
+Download `BORE-Tweaker_v1.0.zip` from the **Releases** page and flash it in the
+Magisk or KernelSU app, then restart the manager and open the module's WebUI.
+
+Do **not** flash GitHub's "Code → Download ZIP" archive, or any other zip that
+wraps the files in a `BORE-Tweaker/` folder: the manager wants `module.prop` at
+the root of the archive and fails with `-1` when it is nested. To build the zip
+yourself, run `sh build.sh` in this directory — it produces exactly the file
+attached to the release.
+
+The kernel is a separate download. An AnyKernel3 zip is flashed to the **boot
+partition** (with a kernel flasher, or `fastboot flash boot`), never installed
+from the module list: it has no `module.prop`, so a manager that tries to read it
+as a module rejects it.
 
 ## Status
 
