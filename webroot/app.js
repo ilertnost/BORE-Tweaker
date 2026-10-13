@@ -75,11 +75,34 @@ const RUNTIME = (typeof magisk !== 'undefined' && magisk) ||
                 (typeof nm !== 'undefined' && nm) ||
                 null;
 
+const MODULE_ID = 'BORE-Tweaker';
+
 /* ---------- helpers --------------------------------------------------- */
 
 function setStatus(t) { document.getElementById('status').textContent = t; }
 
-function moddir() { return (RUNTIME && RUNTIME.MODDIR) || '.'; }
+/*
+ * The module directory, needed to run apply.sh.
+ *
+ * Magisk/MMRL hand it over as MODDIR. KernelSU does not: its WebUI bridge
+ * exposes no such property, and exec() runs the command from /, so a relative
+ * "./apply.sh" never resolves. The path comes from ksu.moduleInfo(), which
+ * returns an object with moduleDir in it. The fixed install path is the last
+ * resort.
+ */
+let _moddir = '';
+function moddir() {
+  if (_moddir) return _moddir;
+  if (RUNTIME && RUNTIME.MODDIR) { _moddir = RUNTIME.MODDIR; return _moddir; }
+  try {
+    if (RUNTIME && typeof RUNTIME.moduleInfo === 'function') {
+      const info = JSON.parse(RUNTIME.moduleInfo());
+      if (info && info.moduleDir) { _moddir = info.moduleDir; return _moddir; }
+    }
+  } catch (e) { /* not a manager that has moduleInfo */ }
+  _moddir = '/data/adb/modules/' + MODULE_ID;
+  return _moddir;
+}
 
 async function sh(cmd) {
   if (!RUNTIME || !RUNTIME.exec) return null;
@@ -89,6 +112,35 @@ async function sh(cmd) {
   } catch (e) {
     return null;
   }
+}
+
+/*
+ * Run a command and also get its exit status. Managers differ in what they
+ * hand back — some a String of stdout, some {errno, stdout, stderr} — so the
+ * status is appended to stdout as a sentinel instead of read from the return.
+ */
+async function shStatus(cmd) {
+  const out = await sh('{ ' + cmd + ' ; } 2>&1; echo "__BORE_EXIT=$?"');
+  if (out === null) return { code: null, out: 'no manager exec API' };
+  const m = /__BORE_EXIT=(\d+)\s*$/.exec(out);
+  return {
+    code: m ? parseInt(m[1], 10) : null,
+    out: m ? out.slice(0, m.index) : out,
+  };
+}
+
+/*
+ * Apply a profile and, only if it actually took, remember it for the next
+ * boot. apply.sh is the same path service.sh uses, so the GUI and boot cannot
+ * drift apart.
+ */
+async function applyProfile(name) {
+  const r = await shStatus('sh "' + moddir() + '/apply.sh" ' + name);
+  if (r.code === 0 && /applied profile/.test(r.out)) {
+    await sh('echo "' + name + '" > /data/adb/BORE-Tweaker/profile');
+    return { ok: true };
+  }
+  return { ok: false, detail: (r.out || '').trim() || ('exit ' + r.code) };
 }
 
 function readCmd(key) {
@@ -244,11 +296,11 @@ async function paintProfiles() {
     b.setAttribute('aria-pressed', p === active ? 'true' : 'false');
     b.onclick = async () => {
       warn(true, 'Applying ' + p + ' …');
-      await sh('echo "' + p + '" > /data/adb/BORE-Tweaker/profile');
-      await sh('sh "' + moddir() + '/apply.sh" ' + p);
+      const res = await applyProfile(p);
       await paintProfiles();
       paint(await readState());
-      warn(false);
+      if (res.ok) warn(false);
+      else warn(true, 'Could not apply "' + p + '": ' + res.detail);
     };
     host.appendChild(b);
   });
@@ -269,10 +321,10 @@ async function paintProfiles() {
 
   document.getElementById('reset').onclick = async () => {
     warn(true, 'Restoring defaults …');
-    await sh('echo "stock" > /data/adb/BORE-Tweaker/profile');
-    await sh('sh "' + moddir() + '/apply.sh" stock');
+    const res = await applyProfile('stock');
     await paintProfiles();
     paint(await readState());
-    warn(false);
+    if (res.ok) warn(false);
+    else warn(true, 'Could not restore defaults: ' + res.detail);
   };
 })();
