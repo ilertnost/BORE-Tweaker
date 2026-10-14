@@ -104,43 +104,51 @@ function moddir() {
   return _moddir;
 }
 
+/*
+ * Run a command and return its answer.
+ *
+ * Every command here is written so that what it wants to say is on its LAST
+ * line, and this returns exactly that line. KernelSU's one-argument exec is
+ * libsu's fastCmd, which returns only the last line of stdout and drops stderr
+ * entirely; a plain multi-line command comes back truncated to its tail.
+ */
 async function sh(cmd) {
   if (!RUNTIME || !RUNTIME.exec) return null;
   try {
     const r = await RUNTIME.exec(cmd);
-    return (r && (r.stdout !== undefined ? r.stdout : r)) || '';
+    const out = (r && r.stdout !== undefined) ? r.stdout : r;
+    if (out === null || out === undefined) return '';
+    const lines = String(out).replace(/\s+$/, '').split('\n');
+    return lines[lines.length - 1];
   } catch (e) {
     return null;
   }
 }
 
 /*
- * Run a command and also get its exit status. Managers differ in what they
- * hand back — some a String of stdout, some {errno, stdout, stderr} — so the
- * status is appended to stdout as a sentinel instead of read from the return.
- */
-async function shStatus(cmd) {
-  const out = await sh('{ ' + cmd + ' ; } 2>&1; echo "__BORE_EXIT=$?"');
-  if (out === null) return { code: null, out: 'no manager exec API' };
-  const m = /__BORE_EXIT=(\d+)\s*$/.exec(out);
-  return {
-    code: m ? parseInt(m[1], 10) : null,
-    out: m ? out.slice(0, m.index) : out,
-  };
-}
-
-/*
  * Apply a profile and, only if it actually took, remember it for the next
  * boot. apply.sh is the same path service.sh uses, so the GUI and boot cannot
  * drift apart.
+ *
+ * apply.sh's output is redirected to a log so the only thing left on stdout —
+ * and so the only line the manager hands back — is the exit status. On failure
+ * the reason is fetched separately, because only its last line would survive a
+ * direct read.
  */
 async function applyProfile(name) {
-  const r = await shStatus('sh "' + moddir() + '/apply.sh" ' + name);
-  if (r.code === 0 && /applied profile/.test(r.out)) {
+  const log = '/data/adb/BORE-Tweaker/last-apply.log';
+  const rc = await sh('sh "' + moddir() + '/apply.sh" ' + name +
+                      ' >' + log + ' 2>&1; echo $?');
+  const code = parseInt(String(rc).trim(), 10);
+  if (code === 0) {
     await sh('echo "' + name + '" > /data/adb/BORE-Tweaker/profile');
     return { ok: true };
   }
-  return { ok: false, detail: (r.out || '').trim() || ('exit ' + r.code) };
+  const why = await sh('grep -m1 "could not write" ' + log + ' 2>/dev/null');
+  return {
+    ok: false,
+    detail: (why || '').trim() || ('exit ' + (isNaN(code) ? '?' : code)),
+  };
 }
 
 function readCmd(key) {

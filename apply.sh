@@ -34,13 +34,21 @@ write() {
     return 1
 }
 
+failed=0
 for key in sched_bore sched_burst_exclude_kthreads sched_burst_smoothness_long \
            sched_burst_smoothness_short sched_burst_fork_atavistic \
            sched_burst_parity_threshold sched_burst_penalty_offset \
            sched_burst_penalty_scale sched_burst_cache_stop_count \
            sched_burst_cache_lifetime min_base_slice_ns; do
     eval "val=\$$key"
-    write "$key" "$val"
+    write "$key" "$val" || failed=1
 done
 
-echo "[BORE-Tweaker] applied profile: $PROFILE"
+# Non-zero exit is what the GUI keys off. The message must stay last so a
+# caller that only keeps the final line still learns something useful.
+if [ "$failed" = 0 ]; then
+    echo "[BORE-Tweaker] applied profile: $PROFILE"
+else
+    echo "[BORE-Tweaker] profile $PROFILE applied with write errors"
+    exit 1
+fi

@@ -68,7 +68,7 @@ terminal.
 
 ## Install
 
-Download `BORE-Tweaker_v1.1.zip` from the **Releases** page and flash it in the
+Download `BORE-Tweaker_v1.2.zip` from the **Releases** page and flash it in the
 Magisk or KernelSU app, then restart the manager and open the module's WebUI.
 
 Do **not** flash GitHub's "Code → Download ZIP" archive, or any other zip that
