@@ -1,8 +1,8 @@
 id=BORE-Tweaker
 name=BORE Tweaker
-version=v1.2
-versionCode=10002
+version=v1.3
+versionCode=10003
 author=ilert
-description=GUI to tune the BORE CPU scheduler (HyperOS 4 / APEX-Foundry kernel). Ships ready profiles and lets you set your own values.
+description=GUI to tune the BORE CPU scheduler (HyperOS 4 / APEX-Foundry kernel). Four profiles, live values, Material 3 Expressive UI.
 actionIcon=icon.png
 webuiIcon=icon.png

@@ -3,68 +3,80 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#fbf8ff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121117" media="(prefers-color-scheme: dark)">
 <title>BORE Tweaker</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<header class="appbar">
-  <div class="title">BORE Tweaker</div>
-  <div class="subtitle" id="status">reading…</div>
+<header class="appbar" id="appbar">
+  <div class="brand">
+    <span class="logo" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M13 2 4.5 13.5H11l-1 8.5 8.5-11.5H12l1-8.5Z"/>
+      </svg>
+    </span>
+    <div class="brand-text">
+      <h1>BORE Tweaker</h1>
+      <p class="subtitle" id="status" data-kind="">Connecting…</p>
+    </div>
+    <button class="icon-btn" id="refresh" aria-label="Refresh values" title="Refresh values">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12a9 9 0 1 1-2.64-6.36"/>
+        <path d="M21 3v6h-6"/>
+      </svg>
+    </button>
+  </div>
 </header>
 
 <main>
 
-  <div class="warn" id="warn"></div>
-
-  <section class="card">
-    <h2>Profile</h2>
-    <p class="muted">Applied at every boot by the module's service.sh.</p>
-    <div class="chips" id="profiles"></div>
+  <section class="hero" id="hero">
+    <p class="eyebrow">Active profile</p>
+    <h2 class="hero-title" id="active-name">stock</h2>
+    <p class="hero-desc" id="active-desc">Kernel defaults. Nothing moved.</p>
+    <div class="profiles" id="profiles" role="group" aria-label="Profiles"></div>
   </section>
 
-  <section class="card">
-    <h2>Burst penalty</h2>
-    <p class="muted">How hard a task that has been running is demoted, and
-      how long its burst time survives.</p>
-    <div id="ctrl-penalty"></div>
+  <div id="groups"></div>
+
+  <section class="card danger" style="--i:5">
+    <div class="card-head">
+      <span class="card-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 1 0 3-6.7"/>
+          <path d="M3 3v6h6"/>
+        </svg>
+      </span>
+      <div>
+        <h2>Reset</h2>
+        <p class="blurb">Writes the kernel's own values back. Safe to use if a
+          profile made the device feel wrong.</p>
+      </div>
+    </div>
+    <button class="btn danger-outline" id="reset">Restore defaults</button>
   </section>
 
-  <section class="card">
-    <h2>Preemption</h2>
-    <p class="muted">
-      <strong>min_base_slice_ns</strong> is the shortest time a task may hold
-      the CPU. The kernel rounds it up to a whole tick, and a tick is 4 ms at
-      HZ=250, so 4 ms is the floor and only 8 ms and above change anything.
-      The line below is the value the scheduler actually uses.
-    </p>
-    <div id="ctrl-slice"></div>
-  </section>
-
-  <section class="card">
-    <h2>Burst cache</h2>
-    <p class="muted">How quickly a task's burst state is forgotten.</p>
-    <div id="ctrl-cache"></div>
-  </section>
-
-  <section class="card">
-    <h2>Behaviour switches</h2>
-    <div id="ctrl-flags"></div>
-  </section>
-
-  <section class="card danger">
-    <h2>Reset</h2>
-    <p class="muted">Writes the kernel defaults back. Safe to use if a
-      profile made the device feel wrong.</p>
-    <button class="btn" id="reset">Restore defaults</button>
-  </section>
+  <footer>
+  <strong>BORE Tweaker v1.3</strong><br>
+  Values are read and written through the manager's exec API. Knobs this
+  kernel does not expose are hidden instead of shown as zero. Changes made
+  with the sliders apply live; the profile tiles are what survives a reboot.
+</footer>
 
 </main>
 
-<footer class="muted small">
-  Reads and writes through the manager's exec API. Values not present on
-  this kernel are hidden rather than shown as zero.
-</footer>
+<div class="snackbar" id="snackbar" role="status" aria-live="polite"></div>
+
+<noscript>
+  <p class="noscript">This page needs JavaScript: the module talks to the
+    kernel through the manager's WebUI bridge.</p>
+</noscript>
 
 <script src="app.js"></script>
 </body>

@@ -9,6 +9,27 @@ Applies a BORE profile at every boot, and lets you change any single knob
 live from the module GUI. Nothing is patched in the kernel image — the module
 only writes the sysctl/debugfs values the kernel already exposes.
 
+### What v1.3 changes
+
+The WebUI was redrawn in Material 3 Expressive style: a large tonal header that
+carries the active profile, colour-coded profile tiles, custom sliders and
+switches, and a snackbar instead of a box that shoves the page around. The
+kernel interface did not change — same knobs, same `apply.sh`, same boot path.
+The main functional change is that the GUI reads the whole state in one `exec`
+instead of one per knob; "Restore defaults" now asks for a second tap.
+
+`Balanced` and `Battery` were retuned. `Balanced` now sits between stock and
+performance instead of being stock with one value moved, and `Battery` keeps its
+8 ms slice but gets a calmer penalty curve and a longer burst cache. `Stock` and
+`Performance` are unchanged.
+
+| profile | slice | burst cache | penalty offset / scale |
+|---|---|---|---|
+| `stock` | 4 ms | 75 ms | 24 / 1280 |
+| `balanced` | 4 ms | 96 ms | 22 / 1472 |
+| `battery` | 8 ms | 128 ms | 32 / 1024 |
+| `performance` | 4 ms | 50 ms | 16 / 1920 |
+
 ## The knobs
 
 These are the BORE parameters as they exist in `kernel/sched/bore.c` of the
@@ -28,12 +49,12 @@ kernel this module is for:
 | `sched_burst_cache_lifetime` | 75000000 (75 ms) | 15..250 ms |
 | `min_base_slice_ns` | 2000000 (2 ms) | 4..16 ms, whole ticks |
 
-On v1.2 of the kernel every one of them is a writable sysctl under
+On the APEX-Foundry kernel every one of them is a writable sysctl under
 `/proc/sys/kernel/`. `min_base_slice_ns` used to exist only in debugfs
 (`/sys/kernel/debug/sched/`), which stock Android does not mount, so the module
-could not reach it at all. v1.2 adds it — and the read-only `base_slice_ns` — to
-the BORE sysctls. The write path here still falls back to the debugfs file of the
-same name, so the module works on older kernels too.
+could not reach it at all. Kernel v1.2 added it — and the read-only
+`base_slice_ns` — to the BORE sysctls. The write path here still falls back to
+the debugfs file of the same name, so the module works on older kernels too.
 
 ### min_base_slice_ns is quantised, and this module says so
 
@@ -68,7 +89,7 @@ terminal.
 
 ## Install
 
-Download `BORE-Tweaker_v1.2.zip` from the **Releases** page and flash it in the
+Download `BORE-Tweaker_v1.3.zip` from the **Releases** page and flash it in the
 Magisk or KernelSU app, then restart the manager and open the module's WebUI.
 
 Do **not** flash GitHub's "Code → Download ZIP" archive, or any other zip that
@@ -86,8 +107,9 @@ as a module rejects it.
 
 The module side is complete and the GUI is functional. **The profiles themselves
 are not measured** — the values other than "stock" are reasoned starting points,
-and are labelled as such in their files. If you change a profile, re-run a
-benchmark before claiming an improvement.
+and are labelled as such in their files. v1.3 retunes `balanced` and `battery`
+the same way: by reasoning about the knobs, not by measurement. If you change a
+profile, re-run a benchmark before claiming an improvement.
 
 ## Thanks
 

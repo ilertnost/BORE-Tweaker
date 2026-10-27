@@ -5,10 +5,10 @@
 # value. service.sh calls this at boot, and the GUI calls the same script, so
 # there is one code path instead of three.
 #
-# Writing prefers the sysctl at /proc/sys/kernel/. v1.2 exposes every BORE knob
-# there, min_base_slice_ns included, and falls back to the debugfs file of the
-# same name for kernels that only have the debugfs path. base_slice_ns is
-# read-only and is never written here.
+# Writing prefers the sysctl at /proc/sys/kernel/. The APEX-Foundry kernel
+# exposes every BORE knob there, min_base_slice_ns included, and falls back to
+# the debugfs file of the same name for kernels that only have the debugfs path.
+# base_slice_ns is read-only and is never written here.
 MODPATH="${0%/*}"
 CONF_DIR="/data/adb/BORE-Tweaker"
 
